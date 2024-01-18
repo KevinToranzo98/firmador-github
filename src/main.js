@@ -17,10 +17,6 @@ function createWindow() {
     win.show(); // Muestra la ventana cuando está lista
     setTimeout(() => {
       win.hide();
-      autoUpdater.checkForUpdates();
-      console.log(
-        `Comprobación de actualizaciones. Versión actual ${app.getVersion()}`
-      );
     }, 2000);
     win.isMinimized();
   });
@@ -43,11 +39,20 @@ function createWindow() {
   appTray.setContextMenu(contextMenu);
 }
 
+// app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length == 0) createWindow();
+  });
+  autoUpdater.checkForUpdates();
+  console.log(
+    `Comprobación de actualizaciones. Versión actual ${app.getVersion()}`
+  );
+});
+
 /*New Update Available*/
 autoUpdater.on('update-available', (info) => {
-  curWindow.showMessage(
-    `Actualización disponible. Versión actual ${app.getVersion()}`
-  );
+  console.log(`Actualización disponible. Versión actual ${app.getVersion()}`);
 
   autoUpdater
     .downloadUpdate()
@@ -55,38 +60,33 @@ autoUpdater.on('update-available', (info) => {
       console.log('AAAAAAAAAAAAAa', downloadPath);
       console.log('Descargado en:', downloadPath);
 
-      curWindow.showMessage('Descargando actualización...');
+      console.log('Descargando actualización...');
 
       // Instala la actualización después de descargarla
       autoUpdater.quitAndInstall(true, true);
     })
     .catch((error) => {
-      curWindow.showMessage(
-        `Error al descargar la actualización: ${error.message}`
-      );
+      console.log(`Error al descargar la actualización: ${error.message}`);
     });
 });
 
 autoUpdater.on('update-not-available', (info) => {
-  curWindow.showMessage(
+  console.log(
     `No hay actualizaciones disponibles. Versión actual ${app.getVersion()}`
   );
 });
 
 /*Download Completion Message*/
 autoUpdater.on('update-downloaded', (info) => {
-  curWindow.showMessage(
-    `Actualización descargada. Versión actual ${app.getVersion()}`
-  );
+  console.log(`Actualización descargada. Versión actual ${app.getVersion()}`);
 });
 
 autoUpdater.on('error', (info) => {
   console.log('ERROOOOOR', info);
 
-  curWindow.showMessage(info);
+  console.log(info);
 });
 
-app.whenReady().then(createWindow);
 app.on('window-all-closed', () => {
   stopServers();
   app.quit();
